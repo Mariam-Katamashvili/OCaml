@@ -17,5 +17,5 @@ let vector3_add (v1, v2, v3) (u1, u2, u3) = (v1 + u1, v2 + u2, v3 + u3);;
 let vector3_max (v1, v2, v3) (u1, u2, u3) = if sqrt(float (v1 * v1 + v2 * v2 + v3 * v3)) > sqrt(float (u1 * u1 + u2 * u2 + u3 * u3)) 
 then (v1, v2, v3) else (u1, u2, u3);;
 
-(*Compute the result of adding p1 to the larger of p2 and p3 and print the result as a string.*)(*todo*)
+(*Compute the result of adding p1 to the larger of p2 and p3 and print the result as a string.*)
 let final = vector3_to_string(vector3_add p1 (vector3_max p2 p3));;

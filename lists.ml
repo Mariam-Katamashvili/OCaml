@@ -23,8 +23,7 @@ let rec list_to_int l1 = match l1 with
 let rec int_to_list a = if a mod 10 = a then [a] 
 else int_to_list(a / 10) @ [a mod 10];;
 
-
-(*List reverse*)
+(*Reverse the list*)
 let rec list_reverse l1 = match l1 with
   |[] -> l1
   |h::tail -> list_reverse (tail) @ [h];;

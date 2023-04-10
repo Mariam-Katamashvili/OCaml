@@ -1,11 +1,11 @@
-(*Define a data type for a student. For every student the first name, last name, identification number, current semester 
+(*Define a data type for a student. For every student the first name, last name, identification number(unique), current semester 
 as well as the grades received in different courses have to be stored. A course is simply represented by a number.*)
 type student = {fname:string; lname:string; id:int; semester:int; grades:(int *float) list};;
 
 (*Define database as a list of students.*)
 
 let st1 = {fname = "a"; lname = "aa"; id = 1; semester = 1; grades = [(10, 3.7); (11, 4.0)]};;
-let st2 = {fname = "b"; lname = "bb"; id = 2; semester = 1; grades = [(10, 2.7); (11, 3.0)]};;
+let st2 = {fname = "b"; lname = "bb"; id = 2; semester = 1; grades = [(5, 2.7); (11, 3.0)]};;
 let st3 = {fname = "c"; lname = "cc"; id = 3; semester = 2; grades = [(10, 1.7); (11, 2.0)]};;
 let st4 = {fname = "d"; lname = "cc"; id = 4; semester = 3; grades = [(10, 1.7); (11, 2.0)]};;
 
@@ -38,5 +38,16 @@ let rec count_in_semester semester db = match db with
 (*Implement a function student_avg_grade : int -> database -> float computes the average grade of the student with the given id. 
 If no student with the given id exists or the student does not have any grades, the function shall return 0.0.*)
 
+(*We create an additional function grade_counter which counts the sum of grades in the list of tuples. If the list is empty,
+meaning student does not have any grades, the function returns 0.0.*)
+let rec grade_counter lst = match lst with
+  |[] -> 0.0
+  |(_, a)::tail -> a +. grade_counter tail;; 
+
+let rec student_avg_grade id db = match find_by_id id db with
+  |[] -> 0.0
+  |h::tail -> if h.grades = [] then 0.0 else (student_avg_grade h.grades) /. (Int.to_float (List.length h.grades));;
+
 (*Implement a function course_avg_grade : int -> database -> float computes the average grade achieved in the given course. 
 If no grades in the given course exist, the function shall return 0.0.*)
+

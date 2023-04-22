@@ -114,10 +114,20 @@ let rec goal_counter player lst = match lst with
 
 let rec second_list lst = match lst with
   |[] -> []
-  |(team1, [], team2, [])::tail -> second_list tail
-  |(team1, h1::tail1, team2, [])::tail -> (h1, team1, goal_counter h1)::second_list tail
-  |(team1, [], team2, h2::tail2)::tail -> (h2, team2, goal_counter h2)::second_list tail
-  |(team1, h1::tail1, team2, h2::tail2)::tail -> (h1, team1, goal_counter h1)::(h2, team2, goal_counter h2)::second_list tail
+  | (team1, [], team2, []) :: tail -> second_list tail
+  | (team1, h1 :: tail1, team2, h2 :: tail2) :: tail ->
+      (h1, team1, goal_counter h1) ::
+      (h2, team2, goal_counter h2) ::
+      (second_list [(team1, tail1, team2, tail2)]) @
+      (second_list tail)
+  | (team1, h1 :: tail1, team2, []) :: tail ->
+      (h1, team1, goal_counter h1) ::
+      (second_list [(team1, tail1, team2, [])]) @
+      (second_list tail)
+  | (team1, [], team2, h2 :: tail2) :: tail ->
+      (h2, team2, goal_counter h2) ::
+      (second_list [(team1, [], team2, tail2)]) @
+      (second_list tail)
   |> sort_by_player_name_alphabetically;;
 
 

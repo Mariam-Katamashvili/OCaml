@@ -40,14 +40,32 @@ If no student with the given id exists or the student does not have any grades, 
 
 (*We create an additional function grade_counter which counts the sum of grades in the list of tuples. If the list is empty,
 meaning student does not have any grades, the function returns 0.0.*)
+
 let rec grade_counter lst = match lst with
   |[] -> 0.0
   |(_, a)::tail -> a +. grade_counter tail;; 
 
 let rec student_avg_grade id db = match find_by_id id db with
   |[] -> 0.0
-  |h::tail -> if h.grades = [] then 0.0 else (student_avg_grade h.grades) /. (Int.to_float (List.length h.grades));;
+  |h::tail -> if h.grades = [] then 0.0 else (grade_counter h.grades) /. (Int.to_float (List.length h.grades));;
+
 
 (*Implement a function course_avg_grade : int -> database -> float computes the average grade achieved in the given course. 
 If no grades in the given course exist, the function shall return 0.0.*)
+
+
+(*how many xtudents are taking this course*)
+let rec courseCounter course_num db = match db with
+  |[] -> 0.0
+  |(x,y)::tail -> if course_num = x then 1.0 +. courseCounter course_num tail else courseCounter course_num tail;; 
+
+let rec get_grade course_num lst = match lst with
+  |[] -> 0.0
+  |(x, y)::tail -> if x = course_num then y else get_grade course_num tail;;
+
+let rec course_grade_sum course_num db = match db with
+|[] -> 0.0
+|h::tail -> get_grade course_num h.grades +. course_grade_sum course_num tail;;
+
+let course_avg_grade course_num db = (course_grade_sum course_num db) /. (courseCounter course_num db);;
 

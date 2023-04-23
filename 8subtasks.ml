@@ -96,30 +96,68 @@ let sort_list_randomly lst =
 
 let sort_list lst = sort_list_by_points (sort_list_by_goal_difference (sort_list_by_goals_for (sort_list_randomly lst)));;
 
-(* let rec first_list =  *)
+let first_list lst =
+  let rec update_list lst t scored conceded = match lst with
+    |[] -> [(t, 1, (if scored > conceded then 1 else 0), (if scored = conceded then 1 else 0), (if scored < conceded then 1 else 0), scored, conceded, (if scored > conceded then 3 else if scored = conceded then 1 else 0))]
+    |(team, g, w, d, l, gf, ga, p)::tail when team = t ->
+      let new_record =
+        (team, g + 1, 
+         w + (if scored > conceded then 1 else 0), 
+         d + (if scored = conceded then 1 else 0), 
+         l + (if scored < conceded then 1 else 0), 
+         gf + scored, ga + conceded, 
+         p + (if scored > conceded then 3 else if scored = conceded then 1 else 0)) in
+      new_record::tail
+    |h::tail -> h::update_list tail t scored conceded in
+  let team_records = ref [] in
+  List.iter (fun (team1, scorers1, team2, scorers2) ->
+    let score1, score2 = (List.length scorers1), (List.length scorers2) in
+    team_records := update_list (update_list !team_records team1 score1 score2) team2 score2 score1
+  ) lst;
+  !team_records
+  |>sort_list;;
 
-let compare_goals (_, _, g1) (_, _, g2) = compare g2 g1;;
-let sort_by_goals = List.sort compare_goals;;
-
-let compare_player_name_alphabetically (p1, _, _) (p2, _, _) = compare p1 p2;;
-let sort_by_player_name_alphabetically = List.sort compare_player_name_alphabetically;;
+let compare_goals_and_names (p1, _, g1) (p2, _, g2) = match compare g2 g1 with
+  |0 -> compare p1 p2
+  |c -> c;;
+let sort_by_goals_and_names = List.sort compare_goals_and_names;;
 
 let rec goal_counter player lst = match lst with
-  |[] -> 0
-  |(_, [], _, [])::tail -> goal_counter player tail
-  |(_, h1::tail1, _, [])::tail ->  if h1 = player then 1 + goal_counter player tail else goal_counter player tail
-  |(_, [], _, h2::tail2)::tail -> if h2 = player then 1 + goal_counter player tail else goal_counter player tail
-  |(_, h1::tail1, _, h2::tail2)::tail -> if h1 = player || h2 = player then 1 + goal_counter player tail else goal_counter player tail;;
+  | [] -> 0
+  | (_, [], _, []) :: tail -> goal_counter player tail
+  | (team1, h1 :: tail1, team2, []) :: tail ->
+      if h1 = player then 1 + goal_counter player ((team1, tail1, team2, []) :: tail)
+      else goal_counter player ((team1, tail1, team2, []) :: tail)
+  | (team1, [], team2, h2 :: tail2) :: tail ->
+      if h2 = player then 1 + goal_counter player ((team1, [], team2, tail2) :: tail)
+      else goal_counter player ((team1, [], team2, tail2) :: tail)
+  | (team1, h1 :: tail1, team2, h2 :: tail2) :: tail ->
+      if h1 = player || h2 = player
+      then 1 + goal_counter player ((team1, tail1, team2, tail2) :: tail)
+      else goal_counter player ((team1, tail1, team2, tail2) :: tail)
 
+let remove_duplicates lst =
+  let sorted = List.sort (fun (p1, _, _) (p2, _, _) -> compare p1 p2) lst in
+    let rec remove_duplicates_sorted lst = match lst with
+      |[] -> []
+      |[x] -> [x]
+      |(player1, team1, goals1)::(player2, team2, goals2)::tail ->
+        if player1 = player2 then remove_duplicates_sorted ((player1, team1, goals1)::tail)
+        else (player1, team1, goals1)::remove_duplicates_sorted ((player2, team2, goals2)::tail) in
+          remove_duplicates_sorted sorted;;
 
 let rec second_list lst = match lst with
-  |[] -> []
-  |(team1, [], team2, [])::tail -> second_list tail
-  |(team1, h1::tail1, team2, [])::tail -> (h1, team1, goal_counter h1)::second_list tail
-  |(team1, [], team2, h2::tail2)::tail -> (h2, team2, goal_counter h2)::second_list tail
-  |(team1, h1::tail1, team2, h2::tail2)::tail -> (h1, team1, goal_counter h1)::(h2, team2, goal_counter h2)::second_list tail
-  |> sort_by_player_name_alphabetically;;
+  | [] -> []
+  | (team1, [], team2, []) :: tail -> second_list tail
+  | (team1, h1 :: tail1, team2, []) :: tail ->
+      (h1, team1, goal_counter h1 lst) :: (second_list ((team1, tail1, team2, []) :: tail))
+  | (team1, [], team2, h2 :: tail2) :: tail ->
+      (h2, team2, goal_counter h2 lst) :: (second_list ((team1, [], team2, tail2) :: tail))
+  | (team1, h1 :: tail1, team2, h2 :: tail2) :: tail ->
+      (h1, team1, goal_counter h1 lst) ::
+      (h2, team2, goal_counter h2 lst) ::
+      (second_list ((team1, tail1, team2, tail2) :: tail))
+  |> remove_duplicates
+  |> sort_by_goals_and_names
 
-
-
-(* let table_and_scorers = (first_list, second_list);; *)
+let table_and_scorers lst = (first_list lst, second_list lst);;

@@ -147,7 +147,6 @@ let remove_duplicates lst =
           remove_duplicates_sorted sorted;;
 
 let rec second_list lst = match lst with
-<<<<<<< HEAD
   | [] -> []
   | (team1, [], team2, []) :: tail -> second_list tail
   | (team1, h1 :: tail1, team2, []) :: tail ->
@@ -162,25 +161,3 @@ let rec second_list lst = match lst with
   |> sort_by_goals_and_names
 
 let table_and_scorers lst = (first_list lst, second_list lst);;
-=======
-  |[] -> []
-  | (team1, [], team2, []) :: tail -> second_list tail
-  | (team1, h1 :: tail1, team2, h2 :: tail2) :: tail ->
-      (h1, team1, goal_counter h1) ::
-      (h2, team2, goal_counter h2) ::
-      (second_list [(team1, tail1, team2, tail2)]) @
-      (second_list tail)
-  | (team1, h1 :: tail1, team2, []) :: tail ->
-      (h1, team1, goal_counter h1) ::
-      (second_list [(team1, tail1, team2, [])]) @
-      (second_list tail)
-  | (team1, [], team2, h2 :: tail2) :: tail ->
-      (h2, team2, goal_counter h2) ::
-      (second_list [(team1, [], team2, tail2)]) @
-      (second_list tail)
-  |> sort_by_player_name_alphabetically;;
-
-
-
-(* let table_and_scorers = (first_list, second_list);; *)
->>>>>>> 718feb3e850a21f4dded9dbc4e8a4eba46caafcb
